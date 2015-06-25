@@ -120,8 +120,8 @@ public final class PropsXlsConverter {
   private static void printHelp(final Options options) {
     HelpFormatter helperFormatter = new HelpFormatter();
     helperFormatter.printHelp(
-        "java -jar *.jar -f export -fn example.xls -wd /tmp/ -langs hu,de -r .*\\.properties "
-            + "\n java -jar *.jar -f import -wd /tmp/",
+        "java -jar *.jar -f export -xls example.xls -wd /tmp/ -langs hu,de -r .*\\.properties "
+            + "\n java -jar *.jar -f import -xls example.xls -wd /tmp/",
         options);
   }
 
