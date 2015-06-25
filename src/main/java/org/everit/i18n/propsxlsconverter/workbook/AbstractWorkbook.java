@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.everit.i18n.propsxlsconverter.helper;
+package org.everit.i18n.propsxlsconverter.workbook;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +24,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 /**
  * Helper class to read, insert, and update row in the application.
  */
-public abstract class WorkbookHelper {
+public abstract class AbstractWorkbook {
 
   protected static final int COLUMN_DEFAULT_LANG = 2;
 
@@ -48,7 +48,7 @@ public abstract class WorkbookHelper {
    * @param languages
    *          the languages which want to find or create to workbook.
    */
-  public WorkbookHelper(final String[] languages) {
+  public AbstractWorkbook(final String[] languages) {
     workbook = new HSSFWorkbook();
     sheet = workbook.createSheet();
     rowNumber = 0;

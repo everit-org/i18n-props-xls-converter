@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.everit.i18n.propsxlsconverter.helper;
+package org.everit.i18n.propsxlsconverter.workbook;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,15 +24,13 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.everit.i18n.propsxlsconverter.dto.WorkbookRowDTO;
-import org.everit.i18n.propsxlsconverter.exception.LanguageException;
-import org.everit.i18n.propsxlsconverter.exception.LanguageException.LanguageErrorCode;
 
 /**
  * Helper class to help manipulate workbook with read.
  */
-public class ImportWorkbookHelper extends WorkbookHelper {
+public class WorkbookReader extends AbstractWorkbook {
 
-  public ImportWorkbookHelper() {
+  public WorkbookReader() {
     super(null);
   }
 
@@ -46,8 +44,7 @@ public class ImportWorkbookHelper extends WorkbookHelper {
    */
   public WorkbookRowDTO getNextRow() {
     if (sheet == null) {
-      throw new LanguageException(LanguageErrorCode.NOT_OPENED_WORKBOOK,
-          "Not opened workbook yet.");
+      throw new RuntimeException("Not opened workbook yet.");
     }
 
     HSSFRow row = sheet.getRow(rowNumber++);
@@ -73,12 +70,12 @@ public class ImportWorkbookHelper extends WorkbookHelper {
   /**
    * Open workbook with the first sheet and read the first row to collect language informations.
    *
-   * @param fileName
-   *          the file name.
+   * @param xlsFileName
+   *          the XLS file name.
    */
-  public void openWorkbook(final String fileName) {
+  public void openWorkbook(final String xlsFileName) {
 
-    try (FileInputStream file = new FileInputStream(new File(fileName))) {
+    try (FileInputStream file = new FileInputStream(new File(xlsFileName))) {
       workbook = new HSSFWorkbook(file);
       // TODO maybe name?
       sheet = workbook.getSheetAt(0);
@@ -98,8 +95,7 @@ public class ImportWorkbookHelper extends WorkbookHelper {
       int size = langColumnNumber.size();
       languages = langColumnNumber.keySet().toArray(new String[size]);
     } catch (IOException e) {
-      throw new LanguageException(LanguageErrorCode.IO_PROBLEM,
-          "Has IO problem when try to open XLS file.", e);
+      throw new RuntimeException("Has IO problem when try to open XLS file.", e);
     }
   }
 }

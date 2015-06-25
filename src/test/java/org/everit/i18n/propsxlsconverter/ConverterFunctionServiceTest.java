@@ -22,16 +22,14 @@ import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.io.FileUtils;
-import org.everit.i18n.propsxlsconverter.exception.LanguageException;
-import org.everit.i18n.propsxlsconverter.exception.LanguageException.LanguageErrorCode;
-import org.everit.i18n.propsxlsconverter.internal.ExportLanguageFiles;
-import org.everit.i18n.propsxlsconverter.internal.ImportLanguageFiles;
+import org.everit.i18n.propsxlsconverter.api.ConverterFunctionService;
+import org.everit.i18n.propsxlsconverter.internal.ConverterFunctionServiceImpl;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class PropsXlsConverterTest {
+public class ConverterFunctionServiceTest {
 
   private static final String FILE_NAME_XLS = "example.xls";
 
@@ -42,6 +40,7 @@ public class PropsXlsConverterTest {
   private static final List<String> MESSAGES2_FOLDER_FILE_NAMES;
 
   private static final String MESSAGES2_FOLDER_NAME = "messages2";
+
   static {
     MESSAGES2_FOLDER_FILE_NAMES = new ArrayList<String>();
     MESSAGES2_FOLDER_FILE_NAMES.add("messages.properties");
@@ -57,6 +56,7 @@ public class PropsXlsConverterTest {
     MESSAGES_FOLDER_FILE_AND_DIRECTORY_NAMES.add("messages_de.properties");
     MESSAGES_FOLDER_FILE_AND_DIRECTORY_NAMES.add(MESSAGES2_FOLDER_NAME);
   }
+  private ConverterFunctionService converterFunctionService;
 
   @After
   public void after() {
@@ -74,74 +74,76 @@ public class PropsXlsConverterTest {
 
     File fileXls = new File(FILE_NAME_XLS);
     FileUtils.deleteQuietly(fileXls);
+
+    converterFunctionService = new ConverterFunctionServiceImpl();
   }
 
   private void checkExportFunctionValidatesProblem() {
     try {
-      new ExportLanguageFiles(null, null, null, null);
+      converterFunctionService.exportLanguageFiles(null, null, null, null);
       Assert.fail("Expect NullPointerExpection.");
     } catch (NullPointerException e) {
       Assert.assertNotNull(e);
     }
 
     try {
-      new ExportLanguageFiles("", null, null, null);
+      converterFunctionService.exportLanguageFiles("", null, null, null);
       Assert.fail("Expect NullPointerExpection.");
     } catch (NullPointerException e) {
       Assert.assertNotNull(e);
     }
 
     try {
-      new ExportLanguageFiles("", "", null, null);
+      converterFunctionService.exportLanguageFiles("", "", null, null);
       Assert.fail("Expect NullPointerExpection.");
     } catch (NullPointerException e) {
       Assert.assertNotNull(e);
     }
 
     try {
-      new ExportLanguageFiles("", "", "", null);
+      converterFunctionService.exportLanguageFiles("", "", "", null);
       Assert.fail("Expect NullPointerExpection.");
     } catch (NullPointerException e) {
       Assert.assertNotNull(e);
     }
 
     try {
-      new ExportLanguageFiles("", "", "", new String[] {});
+      converterFunctionService.exportLanguageFiles("", "", "", new String[] {});
       Assert.fail("Expect IllegalArgumentException.");
     } catch (IllegalArgumentException e) {
       Assert.assertNotNull(e);
     }
 
     try {
-      new ExportLanguageFiles(FILE_NAME_XLS, "", "", new String[] {});
+      converterFunctionService.exportLanguageFiles(FILE_NAME_XLS, "", "", new String[] {});
       Assert.fail("Expect IllegalArgumentException.");
     } catch (IllegalArgumentException e) {
       Assert.assertNotNull(e);
     }
 
     try {
-      new ExportLanguageFiles(FILE_NAME_XLS, "./src/", "", new String[] {});
+      converterFunctionService.exportLanguageFiles(FILE_NAME_XLS, "./src/", "", new String[] {});
       Assert.fail("Expect IllegalArgumentException.");
     } catch (IllegalArgumentException e) {
       Assert.assertNotNull(e);
     }
 
     try {
-      new ExportLanguageFiles(FILE_NAME_XLS, "./src/", "", new String[] {});
+      converterFunctionService.exportLanguageFiles(FILE_NAME_XLS, "./src/", "", new String[] {});
       Assert.fail("Expect IllegalArgumentException.");
     } catch (IllegalArgumentException e) {
       Assert.assertNotNull(e);
     }
 
     try {
-      new ExportLanguageFiles(FILE_NAME_XLS, "pom.xml", "*", new String[] {});
+      converterFunctionService.exportLanguageFiles(FILE_NAME_XLS, "pom.xml", "*", new String[] {});
       Assert.fail("Expect LanguageException.");
-    } catch (LanguageException e) {
-      Assert.assertEquals(LanguageErrorCode.WORKING_DIRECTORY_NOT_DIRECTORY, e.languageErrorCode);
+    } catch (RuntimeException e) {
+      Assert.assertNotNull(e);
     }
 
     try {
-      new ExportLanguageFiles(FILE_NAME_XLS, "./src/", "*", new String[] {});
+      converterFunctionService.exportLanguageFiles(FILE_NAME_XLS, "./src/", "*", new String[] {});
       Assert.fail("Expect PatternSyntaxException.");
     } catch (PatternSyntaxException e) {
       Assert.assertNotNull(e);
@@ -150,48 +152,48 @@ public class PropsXlsConverterTest {
 
   private void checkImportFunctionValidatesProblem() {
     try {
-      new ImportLanguageFiles(null, null);
+      converterFunctionService.importLanguageFiles(null, null);
       Assert.fail("Expect NullPointerExpection.");
     } catch (NullPointerException e) {
       Assert.assertNotNull(e);
     }
 
     try {
-      new ImportLanguageFiles("", null);
+      converterFunctionService.importLanguageFiles("", null);
       Assert.fail("Expect NullPointerExpection.");
     } catch (NullPointerException e) {
       Assert.assertNotNull(e);
     }
 
     try {
-      new ImportLanguageFiles("", "");
+      converterFunctionService.importLanguageFiles("", "");
       Assert.fail("Expect IllegalArgumentException.");
     } catch (IllegalArgumentException e) {
       Assert.assertNotNull(e);
     }
 
     try {
-      new ImportLanguageFiles(FILE_NAME_XLS, "");
+      converterFunctionService.importLanguageFiles(FILE_NAME_XLS, "");
       Assert.fail("Expect IllegalArgumentException.");
     } catch (IllegalArgumentException e) {
       Assert.assertNotNull(e);
     }
 
     try {
-      new ImportLanguageFiles(FILE_NAME_XLS, "pom.xml");
+      converterFunctionService.importLanguageFiles(FILE_NAME_XLS, "pom.xml");
       Assert.fail("Expect LanguageException.");
-    } catch (LanguageException e) {
-      Assert.assertEquals(LanguageErrorCode.WORKING_DIRECTORY_NOT_DIRECTORY, e.languageErrorCode);
+    } catch (RuntimeException e) {
+      Assert.assertNotNull(e);
     }
   }
 
   private void exportFunctionTest() throws IOException {
     File workingDirectory = new File("./src/test/resources/messages/");
 
-    ExportLanguageFiles exportLanguageFiles = new ExportLanguageFiles(FILE_NAME_XLS,
+    converterFunctionService.exportLanguageFiles(FILE_NAME_XLS,
         workingDirectory.getCanonicalPath().toString(),
-        ".*\\.properties$", new String[] { "hu", "de" });
-    exportLanguageFiles.start();
+        ".*\\.properties$",
+        new String[] { "hu", "de" });
 
     File file = new File(FILE_NAME_XLS);
     Assert.assertTrue("The " + FILE_NAME_XLS + " not found", file.exists());
@@ -201,9 +203,8 @@ public class PropsXlsConverterTest {
     File workingDirectory = new File(FOLDER_TARGET_TEST);
     workingDirectory.mkdirs();
 
-    ImportLanguageFiles importLanguageFiles = new ImportLanguageFiles(FILE_NAME_XLS,
+    converterFunctionService.importLanguageFiles(FILE_NAME_XLS,
         workingDirectory.getCanonicalPath().toString());
-    importLanguageFiles.start();
 
     File[] messageFolderFiles = workingDirectory.listFiles();
     Assert.assertEquals("Too less or too much files in the directory.",

@@ -65,7 +65,7 @@
             </goals>
             <inherited>true</inherited>
             <configuration>
-              <descriptor>src/main/resources/assembly/assemply.xml</descriptor>
+              <descriptor>src/main/resources/assembly/assembly.xml</descriptor>
             </configuration>
           </execution>
         </executions>

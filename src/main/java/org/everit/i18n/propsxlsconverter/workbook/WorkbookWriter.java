@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.everit.i18n.propsxlsconverter.helper;
+package org.everit.i18n.propsxlsconverter.workbook;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,15 +21,13 @@ import java.io.IOException;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.everit.i18n.propsxlsconverter.exception.LanguageException;
-import org.everit.i18n.propsxlsconverter.exception.LanguageException.LanguageErrorCode;
 
 /**
  * Helper class to help manipulate workbook with create, insert, update and to save workbook.
  */
-public class ExportWorkBookHelper extends WorkbookHelper {
+public class WorkbookWriter extends AbstractWorkbook {
 
-  public ExportWorkBookHelper(final String[] languages) {
+  public WorkbookWriter(final String[] languages) {
     super(languages);
   }
 
@@ -114,18 +112,17 @@ public class ExportWorkBookHelper extends WorkbookHelper {
   /**
    * Write workbook to file.
    *
-   * @param fileName
+   * @param xlsFileName
    *          the name of the file.
    */
-  public void writeWorkbookToFile(final String fileName) {
+  public void writeWorkbookToFile(final String xlsFileName) {
     try {
       workbook.close();
-      try (FileOutputStream out = new FileOutputStream(new File(fileName))) {
+      try (FileOutputStream out = new FileOutputStream(new File(xlsFileName))) {
         workbook.write(out);
       }
     } catch (IOException e) {
-      throw new LanguageException(LanguageErrorCode.IO_PROBLEM,
-          "Has problem when try to save XLS files.", e);
+      throw new RuntimeException("Has problem when try to save XLS files.", e);
     }
   }
 }

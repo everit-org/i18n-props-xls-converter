@@ -21,15 +21,13 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.everit.i18n.propsxlsconverter.internal.ExportLanguageFiles;
-import org.everit.i18n.propsxlsconverter.internal.ImportLanguageFiles;
+import org.everit.i18n.propsxlsconverter.api.ConverterFunctionService;
+import org.everit.i18n.propsxlsconverter.internal.ConverterFunctionServiceImpl;
 
 /**
  * The main class to manage export or import function.
  */
 public final class PropsXlsConverter {
-
-  private static final String ARG_FILE_NAME = "fileName";
 
   private static final String ARG_FILE_REGULAR_EXPRESSION = "fileRegularExpression";
 
@@ -39,10 +37,12 @@ public final class PropsXlsConverter {
 
   private static final String ARG_WORKING_DIRECTORY = "workingDirectory";
 
+  private static final String ARG_XLS_FILE_NAME = "xlsFileName";
+
   private static Options createOptions() {
     Options options = new Options();
     options.addOption("f", ARG_FUNCTION, true, "The function (import or export). Mandatory.");
-    options.addOption("fn", ARG_FILE_NAME, true,
+    options.addOption("xls", ARG_XLS_FILE_NAME, true,
         "To import or export file names (vivelab-web.xls). Mandatory.");
     options.addOption("wd", ARG_WORKING_DIRECTORY, true,
         "The working directory (/home or C:\\tmp). Mandatory.");
@@ -53,13 +53,6 @@ public final class PropsXlsConverter {
         "List of the languages to be processed. Mandatory only export paremeters."
             + " Example: hu,de,us");
     return options;
-  }
-
-  private static void exportFunction(final String fileName, final String workingDirectory,
-      final String fileRegularExpression, final String[] languages) {
-    ExportLanguageFiles exportLanguageFiles = new ExportLanguageFiles(fileName, workingDirectory,
-        fileRegularExpression, languages);
-    exportLanguageFiles.start();
   }
 
   private static String getEvaluateMandatoryOptionValue(final String key,
@@ -73,11 +66,6 @@ public final class PropsXlsConverter {
       throw e;
     }
     return result;
-  }
-
-  private static void importfunction(final String fileName, final String workingDirectory) {
-    ImportLanguageFiles importLanguageFiles = new ImportLanguageFiles(fileName, workingDirectory);
-    importLanguageFiles.start();
   }
 
   /**
@@ -97,15 +85,17 @@ public final class PropsXlsConverter {
 
     String function = PropsXlsConverter.getEvaluateMandatoryOptionValue(ARG_FUNCTION,
         commandLine, options);
-    String fileName = PropsXlsConverter.getEvaluateMandatoryOptionValue(ARG_FILE_NAME,
+    String xlsFileName = PropsXlsConverter.getEvaluateMandatoryOptionValue(ARG_XLS_FILE_NAME,
         commandLine, options);
     String workingDirectory = PropsXlsConverter.getEvaluateMandatoryOptionValue(
         ARG_WORKING_DIRECTORY,
         commandLine,
         options);
 
+    ConverterFunctionService converterFunctionService = new ConverterFunctionServiceImpl();
     if ("import".equals(function)) {
-      PropsXlsConverter.importfunction(fileName, workingDirectory);
+      converterFunctionService.importLanguageFiles(xlsFileName, workingDirectory);
+
     } else if ("export".equals(function)) {
       String fileRegularExpression = PropsXlsConverter.getEvaluateMandatoryOptionValue(
           ARG_FILE_REGULAR_EXPRESSION,
@@ -115,8 +105,12 @@ public final class PropsXlsConverter {
           ARG_LANGUAGES, commandLine, options);
 
       String[] languages = allLanguages.split(",");
-      PropsXlsConverter.exportFunction(fileName, workingDirectory, fileRegularExpression,
+
+      converterFunctionService.exportLanguageFiles(xlsFileName,
+          workingDirectory,
+          fileRegularExpression,
           languages);
+
     } else {
       PropsXlsConverter.printHelp(options);
       return;
