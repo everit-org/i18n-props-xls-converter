@@ -41,17 +41,21 @@ public final class PropsXlsConverter {
 
   private static Options createOptions() {
     Options options = new Options();
-    options.addOption("f", ARG_FUNCTION, true, "The function (import or export). Mandatory.");
+    options.addOption("f", ARG_FUNCTION, true, "The function: import or export.\n"
+        + "Import: Processes the given excel file and creates the properties files "
+        + "from it.\nExport: exports the properties files to a human readable and "
+        + "editable excel file.\nMandatory.");
     options.addOption("xls", ARG_XLS_FILE_NAME, true,
-        "To import or export file names (vivelab-web.xls). Mandatory.");
+        "The excel file used for the import or export function.\n"
+            + "For example: translation.xls.\nMandatory.");
     options.addOption("wd", ARG_WORKING_DIRECTORY, true,
-        "The working directory (/home or C:\\tmp). Mandatory.");
+        "The working directory used as a base directory for searching the properties "
+            + "files reqursively.\nFor example: /home/foo or C:\\Users\\foo.\nMandatory.");
     options.addOption("r", ARG_FILE_REGULAR_EXPRESSION, true,
-        "File regular expression to use for the recusive search for a file. "
-            + "Mandatory only export parameters. Example: .*\\.properties$");
+        "Regular expression used to search the properties files recursively.\n"
+            + "For example: .*\\.properties$\nMandatory for export function.");
     options.addOption("langs", ARG_LANGUAGES, true,
-        "List of the languages to be processed. Mandatory only export paremeters."
-            + " Example: hu,de,us");
+        "List of the languages to be processed.\nMandatory for the export function.");
     return options;
   }
 
