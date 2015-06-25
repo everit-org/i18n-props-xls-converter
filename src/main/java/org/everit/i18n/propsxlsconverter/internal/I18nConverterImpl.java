@@ -36,16 +36,16 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
-import org.everit.i18n.propsxlsconverter.api.ConverterFunctionService;
+import org.everit.i18n.propsxlsconverter.api.I18nConverter;
 import org.everit.i18n.propsxlsconverter.dto.PropKeyRowNumberDTO;
 import org.everit.i18n.propsxlsconverter.dto.WorkbookRowDTO;
 import org.everit.i18n.propsxlsconverter.workbook.WorkbookReader;
 import org.everit.i18n.propsxlsconverter.workbook.WorkbookWriter;
 
 /**
- * The {@link ConverterFunctionService} implementation.
+ * The {@link I18nConverter} implementation.
  */
-public class ConverterFunctionServiceImpl implements ConverterFunctionService {
+public class I18nConverterImpl implements I18nConverter {
 
   private static final String UNDERLINE = "_";
 
@@ -119,7 +119,7 @@ public class ConverterFunctionServiceImpl implements ConverterFunctionService {
   }
 
   @Override
-  public void exportLanguageFiles(final String xlsFileName, final String workingDirectory,
+  public void exportToXls(final String xlsFileName, final String workingDirectory,
       final String fileRegularExpression, final String[] languages) {
     validateExportParameters(xlsFileName, workingDirectory, fileRegularExpression, languages);
 
@@ -211,7 +211,7 @@ public class ConverterFunctionServiceImpl implements ConverterFunctionService {
     return lastIndexOf;
   }
 
-  private String getPathWhitoutFileName(final String fileAccess,
+  private String getPathWithoutFileName(final String fileAccess,
       final int lastIndexOfFolderSeparator) {
     if (lastIndexOfFolderSeparator > -1) {
       return fileAccess.substring(0, lastIndexOfFolderSeparator);
@@ -220,7 +220,7 @@ public class ConverterFunctionServiceImpl implements ConverterFunctionService {
   }
 
   @Override
-  public void importLanguageFiles(final String xlsFileName, final String workingDirectory) {
+  public void importFromXls(final String xlsFileName, final String workingDirectory) {
     validateImportParameters(xlsFileName, workingDirectory);
 
     WorkbookReader workbookReader = new WorkbookReader();
@@ -347,29 +347,32 @@ public class ConverterFunctionServiceImpl implements ConverterFunctionService {
   private void writePropertiesToFiles(final Map<String, Properties> langProperties,
       final String fileAccess, final String workingDirectory) {
     langProperties.forEach((key, value) -> {
-      File langFile;
+      File langFile = null;
+      String pathWithoutFileName = null;
+      String langFileName = fileAccess;
       if ("".equals(key)) {
         int lastIndexOfFolderSeparator = getLastIndexOfFolderSeparator(fileAccess);
-        String pathWithoutFileName = getPathWhitoutFileName(fileAccess,
+        pathWithoutFileName = getPathWithoutFileName(langFileName,
             lastIndexOfFolderSeparator);
         makeDirectories(workingDirectory, pathWithoutFileName);
 
-        langFile = new File(workingDirectory, fileAccess);
+        langFile = new File(workingDirectory, langFileName);
       } else {
         int lastIndexOfFolderSeparator = getLastIndexOfFolderSeparator(fileAccess);
-        String pathWhitoutFileName = getPathWhitoutFileName(fileAccess,
+        pathWithoutFileName = getPathWithoutFileName(fileAccess,
             lastIndexOfFolderSeparator);
-        makeDirectories(workingDirectory, pathWhitoutFileName);
+        makeDirectories(workingDirectory, pathWithoutFileName);
 
-        String langFileName = calculateLangFileName(fileAccess, key,
+        langFileName = calculateLangFileName(fileAccess, key,
             lastIndexOfFolderSeparator);
-        langFile = new File(workingDirectory, pathWhitoutFileName + langFileName);
+        langFile = new File(workingDirectory, pathWithoutFileName + langFileName);
       }
 
       try (OutputStream out = new FileOutputStream(langFile)) {
         value.store(out, null);
       } catch (IOException e) {
-        throw new RuntimeException("Has IO problem when try to save language file.", e);
+        throw new RuntimeException("Failed to save file [" + pathWithoutFileName + langFileName
+            + "]", e);
       }
 
       value.clear();

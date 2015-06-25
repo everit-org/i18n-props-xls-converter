@@ -18,7 +18,7 @@ package org.everit.i18n.propsxlsconverter.api;
 /**
  * Define the property xls converter functions.
  */
-public interface ConverterFunctionService {
+public interface I18nConverter {
 
   /**
    * Export language files to one XLS file.
@@ -35,7 +35,7 @@ public interface ConverterFunctionService {
    * @param languages
    *          the languages which want to search. Cannot be <code>null</code>.
    */
-  void exportLanguageFiles(final String xlsFileName, final String workingDirectory,
+  void exportToXls(final String xlsFileName, final String workingDirectory,
       final String fileRegularExpression, final String[] languages);
 
   /**
@@ -47,5 +47,5 @@ public interface ConverterFunctionService {
    *          the working directory (Example: c:\\temp or /tmp). Cannot be <code>null</code> or
    *          empty. Must be directory.
    */
-  void importLanguageFiles(final String xlsFileName, final String workingDirectory);
+  void importFromXls(final String xlsFileName, final String workingDirectory);
 }

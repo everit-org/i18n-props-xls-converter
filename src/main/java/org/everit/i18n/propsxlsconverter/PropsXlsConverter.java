@@ -21,8 +21,8 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.everit.i18n.propsxlsconverter.api.ConverterFunctionService;
-import org.everit.i18n.propsxlsconverter.internal.ConverterFunctionServiceImpl;
+import org.everit.i18n.propsxlsconverter.api.I18nConverter;
+import org.everit.i18n.propsxlsconverter.internal.I18nConverterImpl;
 
 /**
  * The main class to manage export or import function.
@@ -96,9 +96,9 @@ public final class PropsXlsConverter {
         commandLine,
         options);
 
-    ConverterFunctionService converterFunctionService = new ConverterFunctionServiceImpl();
+    I18nConverter i18nConverter = new I18nConverterImpl();
     if ("import".equals(function)) {
-      converterFunctionService.importLanguageFiles(xlsFileName, workingDirectory);
+      i18nConverter.importFromXls(xlsFileName, workingDirectory);
 
     } else if ("export".equals(function)) {
       String fileRegularExpression = PropsXlsConverter.getEvaluateMandatoryOptionValue(
@@ -110,7 +110,7 @@ public final class PropsXlsConverter {
 
       String[] languages = allLanguages.split(",");
 
-      converterFunctionService.exportLanguageFiles(xlsFileName,
+      i18nConverter.exportToXls(xlsFileName,
           workingDirectory,
           fileRegularExpression,
           languages);
