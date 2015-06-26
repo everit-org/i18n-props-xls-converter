@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.everit.i18n.propsxlsconverter.workbook;
+package org.everit.i18n.propsxlsconverter.internal.workbook;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -28,38 +28,40 @@ public abstract class AbstractWorkbook {
 
   protected static final int COLUMN_DEFAULT_LANG = 2;
 
-  protected static final int COLUMN_FILE_ACCESS = 0;
+  protected static final int COLUMN_PROPERTIES_FILE_NAME = 0;
 
   protected static final int COLUMN_PROPERTY_KEY = 1;
 
-  protected Map<String, Integer> langColumnNumber = new HashMap<String, Integer>();
+  protected static final String SHEET_NAME = "translations";
 
-  protected String[] languages;
+  protected final Map<String, Integer> langColumnNumber = new LinkedHashMap<>();
 
-  protected int rowNumber;
+  protected int rowNumber = 0;
 
-  protected HSSFSheet sheet;
+  protected final HSSFSheet sheet;
 
-  protected HSSFWorkbook workbook;
+  protected final HSSFWorkbook workbook;
+
+  protected final String xlsFileName;
 
   /**
    * Constructor.
-   *
-   * @param languages
-   *          the languages which want to find or create to workbook.
    */
-  public AbstractWorkbook(final String[] languages) {
-    workbook = new HSSFWorkbook();
-    sheet = workbook.createSheet();
-    rowNumber = 0;
-    this.languages = languages;
+  public AbstractWorkbook(final String xlsFileName) {
+    this.xlsFileName = xlsFileName;
+    workbook = initWorkbook();
+    sheet = initSheet();
   }
 
   public String[] getLanguages() {
-    return languages.clone();
+    return langColumnNumber.keySet().toArray(new String[langColumnNumber.size()]);
   }
 
   public int getLastRowNumber() {
     return sheet.getLastRowNum();
   }
+
+  protected abstract HSSFSheet initSheet();
+
+  protected abstract HSSFWorkbook initWorkbook();
 }

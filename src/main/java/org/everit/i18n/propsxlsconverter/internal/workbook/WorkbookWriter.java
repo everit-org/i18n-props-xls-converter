@@ -13,33 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.everit.i18n.propsxlsconverter.workbook;
+package org.everit.i18n.propsxlsconverter.internal.workbook;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 /**
  * Helper class to help manipulate workbook with create, insert, update and to save workbook.
  */
 public class WorkbookWriter extends AbstractWorkbook {
 
-  public WorkbookWriter(final String[] languages) {
-    super(languages);
-  }
-
   /**
-   * Create the first row to workbook.
+   * Constructor.
    */
-  public void createFirstRow() {
+  public WorkbookWriter(final String xlsFileName, final String[] languages) {
+
+    super(xlsFileName);
+
     HSSFRow firstRow = sheet.createRow(rowNumber++);
-    HSSFCell firstCell = firstRow.createCell(COLUMN_FILE_ACCESS);
+
+    HSSFCell firstCell = firstRow.createCell(COLUMN_PROPERTIES_FILE_NAME);
     firstCell.setCellValue("Relative file path with the working directory");
+
     HSSFCell secondCell = firstRow.createCell(COLUMN_PROPERTY_KEY);
     secondCell.setCellValue("Property key name");
+
     HSSFCell thirdCell = firstRow.createCell(COLUMN_DEFAULT_LANG);
     thirdCell.setCellValue("Default value");
 
@@ -49,13 +52,24 @@ public class WorkbookWriter extends AbstractWorkbook {
       HSSFCell cell = firstRow.createCell(nextColumnNumber++);
       cell.setCellValue(lang);
     }
+
+  }
+
+  @Override
+  protected final HSSFSheet initSheet() {
+    return workbook.createSheet(SHEET_NAME);
+  }
+
+  @Override
+  protected final HSSFWorkbook initWorkbook() {
+    return new HSSFWorkbook();
   }
 
   /**
    * Insert a new row to workbook.
    *
-   * @param fileAccess
-   *          the file access column value.
+   * @param propertiesFile
+   *          the properties file column value.
    * @param propKey
    *          the property key column value.
    * @param lang
@@ -64,15 +78,15 @@ public class WorkbookWriter extends AbstractWorkbook {
    *          the propety value.
    * @return the inserted row number.
    */
-  public int insertRow(final String fileAccess, final String propKey, final String lang,
+  public int insertRow(final String propertiesFile, final String propKey, final String lang,
       final String propValue) {
     int insertedRowNumber = rowNumber;
     rowNumber++;
 
     HSSFRow row = sheet.createRow(insertedRowNumber);
 
-    HSSFCell first = row.createCell(COLUMN_FILE_ACCESS);
-    first.setCellValue(fileAccess);
+    HSSFCell first = row.createCell(COLUMN_PROPERTIES_FILE_NAME);
+    first.setCellValue(propertiesFile);
 
     HSSFCell second = row.createCell(COLUMN_PROPERTY_KEY);
     second.setCellValue(propKey);
@@ -80,7 +94,7 @@ public class WorkbookWriter extends AbstractWorkbook {
     row.createCell(COLUMN_DEFAULT_LANG);
 
     int nextColumnNumber = COLUMN_DEFAULT_LANG + 1;
-    for (int i = 0; i < languages.length; i++) {
+    for (int i = 0; i < getLanguages().length; i++) {
       row.createCell(nextColumnNumber++);
     }
 
@@ -111,18 +125,13 @@ public class WorkbookWriter extends AbstractWorkbook {
 
   /**
    * Write workbook to file.
-   *
-   * @param xlsFileName
-   *          the name of the file.
    */
-  public void writeWorkbookToFile(final String xlsFileName) {
-    try {
+  public void writeWorkbookToFile() {
+    try (FileOutputStream out = new FileOutputStream(xlsFileName)) {
       workbook.close();
-      try (FileOutputStream out = new FileOutputStream(new File(xlsFileName))) {
-        workbook.write(out);
-      }
+      workbook.write(out);
     } catch (IOException e) {
-      throw new RuntimeException("Has problem when try to save XLS files.", e);
+      throw new RuntimeException("Failed to save XLS file [" + xlsFileName + "].", e);
     }
   }
 }

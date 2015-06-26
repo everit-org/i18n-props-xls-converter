@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.everit.i18n.propsxlsconverter.dto;
+package org.everit.i18n.propsxlsconverter.internal.dto;
 
 /**
- * The class to property key and row number binding.
+ * The class for property key and row number binding.
  */
 public class PropKeyRowNumberDTO {
 
@@ -24,19 +24,14 @@ public class PropKeyRowNumberDTO {
 
   public int rowNumber;
 
-  /**
-   * Add property key.
-   */
   public PropKeyRowNumberDTO propKey(final String propKey) {
     this.propKey = propKey;
     return this;
   }
 
-  /**
-   * Add row number.
-   */
   public PropKeyRowNumberDTO rowNumber(final int rowNumber) {
     this.rowNumber = rowNumber;
     return this;
   }
+
 }

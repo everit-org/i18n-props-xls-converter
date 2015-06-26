@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.everit.i18n.propsxlsconverter.api;
+package org.everit.i18n.propsxlsconverter;
 
 /**
  * Define the property xls converter functions.
@@ -35,8 +35,8 @@ public interface I18nConverter {
    * @param languages
    *          the languages which want to search. Cannot be <code>null</code>.
    */
-  void exportToXls(final String xlsFileName, final String workingDirectory,
-      final String fileRegularExpression, final String[] languages);
+  void exportToXls(String xlsFileName, String workingDirectory,
+      String fileRegularExpression, String[] languages);
 
   /**
    * Import XLS file to langauges files.
@@ -45,7 +45,7 @@ public interface I18nConverter {
    *          the name of the imported XLS file. Cannot be <code>null</code> or empty.
    * @param workingDirectory
    *          the working directory (Example: c:\\temp or /tmp). Cannot be <code>null</code> or
-   *          empty. Must be directory.
+   *          empty. Must be an existing directory.
    */
-  void importFromXls(final String xlsFileName, final String workingDirectory);
+  void importFromXls(String xlsFileName, String workingDirectory);
 }

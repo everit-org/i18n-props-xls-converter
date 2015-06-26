@@ -36,11 +36,11 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
-import org.everit.i18n.propsxlsconverter.api.I18nConverter;
-import org.everit.i18n.propsxlsconverter.dto.PropKeyRowNumberDTO;
-import org.everit.i18n.propsxlsconverter.dto.WorkbookRowDTO;
-import org.everit.i18n.propsxlsconverter.workbook.WorkbookReader;
-import org.everit.i18n.propsxlsconverter.workbook.WorkbookWriter;
+import org.everit.i18n.propsxlsconverter.I18nConverter;
+import org.everit.i18n.propsxlsconverter.internal.dto.PropKeyRowNumberDTO;
+import org.everit.i18n.propsxlsconverter.internal.dto.WorkbookRowDTO;
+import org.everit.i18n.propsxlsconverter.internal.workbook.WorkbookReader;
+import org.everit.i18n.propsxlsconverter.internal.workbook.WorkbookWriter;
 
 /**
  * The {@link I18nConverter} implementation.
@@ -129,12 +129,10 @@ public class I18nConverterImpl implements I18nConverter {
         new RegexFileFilter(fileRegularExpression),
         DirectoryFileFilter.DIRECTORY);
 
-    WorkbookWriter workbookWriter = new WorkbookWriter(languages);
-
-    workbookWriter.createFirstRow();
+    WorkbookWriter workbookWriter = new WorkbookWriter(xlsFileName, languages);
 
     if (files.isEmpty()) {
-      workbookWriter.writeWorkbookToFile(xlsFileName);
+      workbookWriter.writeWorkbookToFile();
       return;
     }
 
@@ -169,7 +167,7 @@ public class I18nConverterImpl implements I18nConverter {
       }
     }
 
-    workbookWriter.writeWorkbookToFile(xlsFileName);
+    workbookWriter.writeWorkbookToFile();
   }
 
   private Integer findRowNumber(final String relativePathToDefaultLanguageFile,
@@ -223,9 +221,7 @@ public class I18nConverterImpl implements I18nConverter {
   public void importFromXls(final String xlsFileName, final String workingDirectory) {
     validateImportParameters(xlsFileName, workingDirectory);
 
-    WorkbookReader workbookReader = new WorkbookReader();
-
-    workbookReader.openWorkbook(xlsFileName);
+    WorkbookReader workbookReader = new WorkbookReader(xlsFileName);
 
     Map<String, Properties> langProperties = new HashMap<String, Properties>();
     langProperties.put("", new Properties());
@@ -235,18 +231,18 @@ public class I18nConverterImpl implements I18nConverter {
       langProperties.put(lang, new Properties());
     }
 
-    String prevFileAccess = null;
+    String prevPropertiesFile = null;
     int lastRowNumber = workbookReader.getLastRowNumber();
     for (int i = 1; i <= lastRowNumber; i++) {
       WorkbookRowDTO nextRow = workbookReader.getNextRow();
 
-      if (prevFileAccess == null) {
-        prevFileAccess = nextRow.fileAccess;
+      if (prevPropertiesFile == null) {
+        prevPropertiesFile = nextRow.propertiesFile;
       }
 
-      if (!prevFileAccess.equals(nextRow.fileAccess)) {
-        writePropertiesToFiles(langProperties, prevFileAccess, workingDirectory);
-        prevFileAccess = nextRow.fileAccess;
+      if (!prevPropertiesFile.equals(nextRow.propertiesFile)) {
+        writePropertiesToFiles(langProperties, prevPropertiesFile, workingDirectory);
+        prevPropertiesFile = nextRow.propertiesFile;
       }
 
       langProperties.get("").setProperty(nextRow.propKey, nextRow.defaultLangValue);
@@ -256,7 +252,7 @@ public class I18nConverterImpl implements I18nConverter {
 
     }
 
-    writePropertiesToFiles(langProperties, prevFileAccess, workingDirectory);
+    writePropertiesToFiles(langProperties, prevPropertiesFile, workingDirectory);
   }
 
   private void makeDirectories(final String workingDirectory, final String pathWithoutFileName) {

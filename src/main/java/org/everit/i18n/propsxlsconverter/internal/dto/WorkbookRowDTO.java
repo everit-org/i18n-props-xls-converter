@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.everit.i18n.propsxlsconverter.dto;
+package org.everit.i18n.propsxlsconverter.internal.dto;
 
 import java.util.Map;
 
 /**
- * The workbook one row values.
+ * A workbook row.
  */
 public class WorkbookRowDTO {
 
   public String defaultLangValue;
 
-  public String fileAccess;
-
   public Map<String, String> langValues;
+
+  public String propertiesFile;
 
   public String propKey;
 
@@ -35,13 +35,13 @@ public class WorkbookRowDTO {
     return this;
   }
 
-  public WorkbookRowDTO fileAccess(final String fileAccess) {
-    this.fileAccess = fileAccess;
+  public WorkbookRowDTO langValues(final Map<String, String> langValues) {
+    this.langValues = langValues;
     return this;
   }
 
-  public WorkbookRowDTO langValues(final Map<String, String> langValues) {
-    this.langValues = langValues;
+  public WorkbookRowDTO propertiesFile(final String propertiesFile) {
+    this.propertiesFile = propertiesFile;
     return this;
   }
 

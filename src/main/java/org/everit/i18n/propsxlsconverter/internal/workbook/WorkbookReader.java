@@ -13,25 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.everit.i18n.propsxlsconverter.workbook;
+package org.everit.i18n.propsxlsconverter.internal.workbook;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.everit.i18n.propsxlsconverter.dto.WorkbookRowDTO;
+import org.everit.i18n.propsxlsconverter.internal.dto.WorkbookRowDTO;
 
 /**
  * Helper class to help manipulate workbook with read.
  */
 public class WorkbookReader extends AbstractWorkbook {
 
-  public WorkbookReader() {
-    super(null);
+  /**
+   * Constructor.
+   */
+  public WorkbookReader(final String xlsFileName) {
+    super(xlsFileName);
+
+    HSSFRow firstRow = sheet.getRow(rowNumber++);
+
+    int columnNumber = COLUMN_DEFAULT_LANG + 1;
+    HSSFCell cell = null;
+    while (((cell = firstRow.getCell(columnNumber)) != null)) {
+      if (!cell.getStringCellValue().trim().isEmpty()) {
+        String lang = cell.getStringCellValue();
+        langColumnNumber.put(lang, columnNumber);
+        columnNumber++;
+      }
+    }
+
   }
 
   /**
@@ -48,8 +64,8 @@ public class WorkbookReader extends AbstractWorkbook {
     }
 
     HSSFRow row = sheet.getRow(rowNumber++);
-    HSSFCell fileAccesCell = row.getCell(COLUMN_FILE_ACCESS);
-    String fileAccess = fileAccesCell.getStringCellValue();
+    HSSFCell propertiesFileNameCell = row.getCell(COLUMN_PROPERTIES_FILE_NAME);
+    String propertiesFileName = propertiesFileNameCell.getStringCellValue();
 
     HSSFCell propKeyCell = row.getCell(COLUMN_PROPERTY_KEY);
     HSSFCell defaultLangCell = row.getCell(COLUMN_DEFAULT_LANG);
@@ -61,41 +77,24 @@ public class WorkbookReader extends AbstractWorkbook {
     });
 
     return new WorkbookRowDTO()
-        .fileAccess(fileAccess)
+        .propertiesFile(propertiesFileName)
         .propKey(propKeyCell.getStringCellValue())
         .defaultLangValue(defaultLangCell.getStringCellValue())
         .langValues(langValues);
   }
 
-  /**
-   * Open workbook with the first sheet and read the first row to collect language informations.
-   *
-   * @param xlsFileName
-   *          the XLS file name.
-   */
-  public void openWorkbook(final String xlsFileName) {
+  @Override
+  protected HSSFSheet initSheet() {
+    return workbook.getSheet(SHEET_NAME);
+  }
 
-    try (FileInputStream file = new FileInputStream(new File(xlsFileName))) {
-      workbook = new HSSFWorkbook(file);
-      // TODO maybe name?
-      sheet = workbook.getSheetAt(0);
-
-      HSSFRow firstRow = sheet.getRow(rowNumber++);
-
-      int columnNumber = COLUMN_DEFAULT_LANG + 1;
-      HSSFCell cell = null;
-      while (((cell = firstRow.getCell(columnNumber)) != null)) {
-        if (!cell.getStringCellValue().trim().isEmpty()) {
-          String lang = cell.getStringCellValue();
-          langColumnNumber.put(lang, columnNumber);
-          columnNumber++;
-        }
-      }
-
-      int size = langColumnNumber.size();
-      languages = langColumnNumber.keySet().toArray(new String[size]);
+  @Override
+  protected HSSFWorkbook initWorkbook() {
+    try (FileInputStream file = new FileInputStream(xlsFileName)) {
+      return new HSSFWorkbook(file);
     } catch (IOException e) {
-      throw new RuntimeException("Has IO problem when try to open XLS file.", e);
+      throw new RuntimeException("Failed to open XLS file [" + xlsFileName + "].", e);
     }
   }
+
 }

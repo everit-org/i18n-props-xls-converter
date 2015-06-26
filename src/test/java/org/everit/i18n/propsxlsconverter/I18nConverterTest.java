@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.io.FileUtils;
-import org.everit.i18n.propsxlsconverter.api.I18nConverter;
 import org.everit.i18n.propsxlsconverter.internal.I18nConverterImpl;
 import org.junit.After;
 import org.junit.Assert;
