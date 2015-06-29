@@ -15,12 +15,14 @@
  */
 package org.everit.i18n.propsxlsconverter.internal;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -36,6 +38,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.everit.i18n.propsxlsconverter.I18nConverter;
 import org.everit.i18n.propsxlsconverter.internal.dto.PropKeyRowNumberDTO;
 import org.everit.i18n.propsxlsconverter.internal.dto.WorkbookRowDTO;
@@ -114,7 +117,7 @@ public class I18nConverterImpl implements I18nConverter {
         ? fileAccess.substring(lastIndexOfFolderSeparator)
         : fileAccess;
     int lastDotIndex = fileName.lastIndexOf(".");
-    return fileName.substring(0, lastDotIndex) + "_" + lang
+    return fileName.substring(0, lastDotIndex) + UNDERLINE + lang
         + fileName.substring(lastDotIndex);
   }
 
@@ -232,6 +235,7 @@ public class I18nConverterImpl implements I18nConverter {
     }
 
     String prevPropertiesFile = null;
+    ArrayList<String> propKeySequence = new ArrayList<String>();
     int lastRowNumber = workbookReader.getLastRowNumber();
     for (int i = 1; i <= lastRowNumber; i++) {
       WorkbookRowDTO nextRow = workbookReader.getNextRow();
@@ -241,7 +245,8 @@ public class I18nConverterImpl implements I18nConverter {
       }
 
       if (!prevPropertiesFile.equals(nextRow.propertiesFile)) {
-        writePropertiesToFiles(langProperties, prevPropertiesFile, workingDirectory);
+        writePropertiesToFiles(langProperties, prevPropertiesFile, workingDirectory,
+            propKeySequence);
         prevPropertiesFile = nextRow.propertiesFile;
       }
 
@@ -249,10 +254,11 @@ public class I18nConverterImpl implements I18nConverter {
       for (String lang : languages) {
         langProperties.get(lang).setProperty(nextRow.propKey, nextRow.langValues.get(lang));
       }
-
+      propKeySequence.add(nextRow.propKey);
     }
 
-    writePropertiesToFiles(langProperties, prevPropertiesFile, workingDirectory);
+    writePropertiesToFiles(langProperties, prevPropertiesFile, workingDirectory,
+        propKeySequence);
   }
 
   private void makeDirectories(final String workingDirectory, final String pathWithoutFileName) {
@@ -341,7 +347,8 @@ public class I18nConverterImpl implements I18nConverter {
   }
 
   private void writePropertiesToFiles(final Map<String, Properties> langProperties,
-      final String fileAccess, final String workingDirectory) {
+      final String fileAccess, final String workingDirectory,
+      final ArrayList<String> propKeySequence) {
     langProperties.forEach((key, value) -> {
       File langFile = null;
       String pathWithoutFileName = null;
@@ -364,8 +371,21 @@ public class I18nConverterImpl implements I18nConverter {
         langFile = new File(workingDirectory, pathWithoutFileName + langFileName);
       }
 
-      try (OutputStream out = new FileOutputStream(langFile)) {
-        value.store(out, null);
+      try (FileOutputStream out = new FileOutputStream(langFile);
+          OutputStreamWriter outputStreamWriter = new OutputStreamWriter(out,
+              StandardCharsets.UTF_8);
+          BufferedWriter bw = new BufferedWriter(outputStreamWriter);) {
+
+        StringBuilder sb = new StringBuilder();
+        propKeySequence.forEach((propKey) -> {
+          String propValue = value.getProperty(propKey);
+          sb.append(propKey);
+          sb.append("=");
+          sb.append(StringEscapeUtils.escapeJava(propValue));
+          sb.append("\n");
+        });
+
+        bw.write(sb.toString());
       } catch (IOException e) {
         throw new RuntimeException("Failed to save file [" + pathWithoutFileName + langFileName
             + "]", e);
@@ -373,5 +393,6 @@ public class I18nConverterImpl implements I18nConverter {
 
       value.clear();
     });
+    propKeySequence.clear();
   }
 }
