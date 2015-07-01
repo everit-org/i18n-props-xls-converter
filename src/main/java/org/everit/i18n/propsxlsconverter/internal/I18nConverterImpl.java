@@ -154,7 +154,7 @@ public class I18nConverterImpl implements I18nConverter {
           // ignore empty and comment lines
           if (!"".equals(line) && (line.charAt(0) != '#')) {
             String unescapedLine = StringEscapeUtils.unescapeJava(line);
-            int separatorIndex = getSeparatorIndex(unescapedLine);
+            int separatorIndex = getPropertySeparatorIndex(unescapedLine);
             String propKey = unescapedLine.substring(0, separatorIndex);
             String propValue = unescapedLine.substring(separatorIndex + 1);
 
@@ -231,7 +231,7 @@ public class I18nConverterImpl implements I18nConverter {
     return "";
   }
 
-  private int getSeparatorIndex(final String unescapedLine) {
+  private int getPropertySeparatorIndex(final String unescapedLine) {
     int[] separators = new int[SEPARATOR_SIZE];
     int index = 0;
     separators[index++] = unescapedLine.indexOf('=');
