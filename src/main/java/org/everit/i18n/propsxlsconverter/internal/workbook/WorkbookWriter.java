@@ -38,10 +38,10 @@ public class WorkbookWriter extends AbstractWorkbook {
     HSSFRow firstRow = sheet.createRow(rowNumber++);
 
     HSSFCell firstCell = firstRow.createCell(COLUMN_PROPERTIES_FILE_NAME);
-    firstCell.setCellValue("Relative file path with the working directory");
+    firstCell.setCellValue("Properties file (default language)");
 
     HSSFCell secondCell = firstRow.createCell(COLUMN_PROPERTY_KEY);
-    secondCell.setCellValue("Property key name");
+    secondCell.setCellValue("Key");
 
     HSSFCell thirdCell = firstRow.createCell(COLUMN_DEFAULT_LANG);
     thirdCell.setCellValue("Default value");

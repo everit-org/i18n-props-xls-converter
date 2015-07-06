@@ -48,4 +48,5 @@ public interface I18nConverter {
    *          empty. Must be an existing directory.
    */
   void importFromXls(String xlsFileName, String workingDirectory);
+
 }

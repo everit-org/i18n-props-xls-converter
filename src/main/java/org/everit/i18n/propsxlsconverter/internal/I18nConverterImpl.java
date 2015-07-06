@@ -128,6 +128,7 @@ public class I18nConverterImpl implements I18nConverter {
   @Override
   public void exportToXls(final String xlsFileName, final String workingDirectory,
       final String fileRegularExpression, final String[] languages) {
+
     validateExportParameters(xlsFileName, workingDirectory, fileRegularExpression, languages);
 
     File workingDirectoryFile = new File(workingDirectory);
@@ -251,6 +252,7 @@ public class I18nConverterImpl implements I18nConverter {
 
   @Override
   public void importFromXls(final String xlsFileName, final String workingDirectory) {
+
     validateImportParameters(xlsFileName, workingDirectory);
 
     WorkbookReader workbookReader = new WorkbookReader(xlsFileName);
@@ -336,12 +338,13 @@ public class I18nConverterImpl implements I18nConverter {
    *           if fileRegularExpression is not valid.
    */
   private void validateExportParameters(final String exportedFileName,
-      final String workingDirectory,
-      final String fileRegularExpression, final String[] languages) {
+      final String workingDirectory, final String fileRegularExpression, final String[] languages) {
+
     Objects.requireNonNull(exportedFileName, "Cannot be null exportedFileName.");
     Objects.requireNonNull(workingDirectory, "Cannot be null workingDirectoryName.");
     Objects.requireNonNull(fileRegularExpression, "Cannot be null fileRegularExpression.");
     Objects.requireNonNull(languages, "Cannot be null languages.");
+
     if (exportedFileName.trim().isEmpty()) {
       throw new IllegalArgumentException("The exportedFileName is empty. Cannot be empty.");
     }
@@ -376,6 +379,7 @@ public class I18nConverterImpl implements I18nConverter {
    */
   private void validateImportParameters(final String importedFileName,
       final String workingDirectory) {
+
     Objects.requireNonNull(importedFileName, "Cannot be null importedFileName.");
     Objects.requireNonNull(workingDirectory, "Cannot be null workingDirectoryName.");
 
@@ -395,18 +399,24 @@ public class I18nConverterImpl implements I18nConverter {
   private void writePropertiesToFiles(final Map<String, Properties> langProperties,
       final String fileAccess, final String workingDirectory,
       final ArrayList<String> propKeySequence) {
+
     langProperties.forEach((key, value) -> {
+
       File langFile = null;
       String pathWithoutFileName = null;
       String langFileName = fileAccess;
+
       if ("".equals(key)) {
+
         int lastIndexOfFolderSeparator = getLastIndexOfFolderSeparator(fileAccess);
         pathWithoutFileName = getPathWithoutFileName(langFileName,
             lastIndexOfFolderSeparator);
         makeDirectories(workingDirectory, pathWithoutFileName);
 
         langFile = new File(workingDirectory, langFileName);
+
       } else {
+
         int lastIndexOfFolderSeparator = getLastIndexOfFolderSeparator(fileAccess);
         pathWithoutFileName = getPathWithoutFileName(fileAccess,
             lastIndexOfFolderSeparator);
@@ -423,6 +433,7 @@ public class I18nConverterImpl implements I18nConverter {
           BufferedWriter bw = new BufferedWriter(outputStreamWriter);) {
 
         StringBuilder sb = new StringBuilder();
+
         propKeySequence.forEach((propKey) -> {
           String propValue = value.getProperty(propKey);
           sb.append(propKey);
@@ -433,12 +444,13 @@ public class I18nConverterImpl implements I18nConverter {
 
         bw.write(sb.toString());
       } catch (IOException e) {
-        throw new RuntimeException("Failed to save file [" + pathWithoutFileName + langFileName
-            + "]", e);
+        throw new RuntimeException(
+            "Failed to save file [" + pathWithoutFileName + langFileName + "]", e);
       }
 
       value.clear();
     });
+
     propKeySequence.clear();
   }
 }
