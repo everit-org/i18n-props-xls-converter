@@ -15,24 +15,26 @@
  */
 package org.everit.i18n.propsxlsconverter.internal;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
@@ -49,6 +51,8 @@ import org.everit.i18n.propsxlsconverter.internal.workbook.WorkbookWriter;
  * The {@link I18nConverter} implementation.
  */
 public class I18nConverterImpl implements I18nConverter {
+
+  private static final int SEPARATOR_SIZE = 5;
 
   private static final String UNDERLINE = "_";
 
@@ -128,9 +132,7 @@ public class I18nConverterImpl implements I18nConverter {
 
     File workingDirectoryFile = new File(workingDirectory);
 
-    Collection<File> files = FileUtils.listFiles(workingDirectoryFile,
-        new RegexFileFilter(fileRegularExpression),
-        DirectoryFileFilter.DIRECTORY);
+    Collection<File> files = getFilesWithSorted(fileRegularExpression, workingDirectoryFile);
 
     WorkbookWriter workbookWriter = new WorkbookWriter(xlsFileName, languages);
 
@@ -143,30 +145,25 @@ public class I18nConverterImpl implements I18nConverter {
       String lang = getLanguage(file.getName(), languages);
       String fileAccess = calculateFileAccess(file, languages, workingDirectory);
 
-      try (InputStream inputStream = new FileInputStream(file)) {
-        Properties properties = new Properties();
-        properties.load(inputStream);
+      try (FileInputStream fileInputStream = new FileInputStream(file);
+          InputStreamReader inputStreamReader =
+              new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
+          BufferedReader br = new BufferedReader(inputStreamReader)) {
+        String line = null;
+        while ((line = br.readLine()) != null) {
+          // ignore empty and comment lines
+          if (!"".equals(line) && (line.charAt(0) != '#')) {
+            String unescapedLine = StringEscapeUtils.unescapeJava(line);
+            int separatorIndex = getPropertySeparatorIndex(unescapedLine);
+            String propKey = unescapedLine.substring(0, separatorIndex);
+            String propValue = unescapedLine.substring(separatorIndex + 1);
 
-        Set<String> propertyNames = properties.stringPropertyNames();
-        for (String propKey : propertyNames) {
-          Integer updatedRowNumber = findRowNumber(fileAccess, propKey);
-          String propValue = properties.getProperty(propKey);
-
-          if (updatedRowNumber == null) {
-            int rowNumber = workbookWriter.insertRow(fileAccess,
-                propKey,
-                lang,
-                propValue);
-            addPropKeyRowNumberToWorkbookKeyMap(fileAccess, propKey,
-                rowNumber);
-          } else {
-            workbookWriter.updateRow(updatedRowNumber,
-                lang,
-                propValue);
+            insertOrUpdateWorkbookRow(workbookWriter, lang, fileAccess, propKey, propValue);
           }
         }
       } catch (IOException e) {
-        throw new RuntimeException("Has problem with IO when try to load properties files.", e);
+        throw new RuntimeException("Has problem with IO when try to load/process properties "
+            + "files.", e);
       }
     }
 
@@ -186,6 +183,20 @@ public class I18nConverterImpl implements I18nConverter {
       }
     }
     return null;
+  }
+
+  private Collection<File> getFilesWithSorted(final String fileRegularExpression,
+      final File workingDirectoryFile) {
+    Collection<File> files = FileUtils.listFiles(workingDirectoryFile,
+        new RegexFileFilter(fileRegularExpression),
+        DirectoryFileFilter.DIRECTORY);
+
+    if (files instanceof List<?>) {
+      // guarantees that the first file is the default language file.
+      Collections.sort((List<File>) files,
+          (file1, file2) -> file1.getName().compareTo(file2.getName()));
+    }
+    return files;
   }
 
   /**
@@ -218,6 +229,24 @@ public class I18nConverterImpl implements I18nConverter {
       return fileAccess.substring(0, lastIndexOfFolderSeparator);
     }
     return "";
+  }
+
+  private int getPropertySeparatorIndex(final String unescapedLine) {
+    int[] separators = new int[SEPARATOR_SIZE];
+    int index = 0;
+    separators[index++] = unescapedLine.indexOf('=');
+    separators[index++] = unescapedLine.indexOf(' ');
+    separators[index++] = unescapedLine.indexOf(':');
+    separators[index++] = unescapedLine.indexOf('\t');
+    separators[index++] = unescapedLine.indexOf('\f');
+    Arrays.sort(separators);
+    for (int i = 0; i < separators.length; i++) {
+      if (separators[i] != -1) {
+        return separators[i];
+      }
+    }
+    throw new RuntimeException("Not find separator in the line. Unescaped line: [" + unescapedLine
+        + "].");
   }
 
   @Override
@@ -259,6 +288,23 @@ public class I18nConverterImpl implements I18nConverter {
 
     writePropertiesToFiles(langProperties, prevPropertiesFile, workingDirectory,
         propKeySequence);
+  }
+
+  private void insertOrUpdateWorkbookRow(final WorkbookWriter workbookWriter, final String lang,
+      final String fileAccess, final String propKey, final String propValue) {
+    Integer updatedRowNumber = findRowNumber(fileAccess, propKey);
+    if (updatedRowNumber == null) {
+      int rowNumber = workbookWriter.insertRow(fileAccess,
+          propKey,
+          lang,
+          propValue);
+      addPropKeyRowNumberToWorkbookKeyMap(fileAccess, propKey,
+          rowNumber);
+    } else {
+      workbookWriter.updateRow(updatedRowNumber,
+          lang,
+          propValue);
+    }
   }
 
   private void makeDirectories(final String workingDirectory, final String pathWithoutFileName) {
