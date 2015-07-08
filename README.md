@@ -7,32 +7,21 @@ Using this converter you can collect internatialization properties files (contai
 lines ) and writes their content into an XLS file (export) to support easier transalation of a 
 project. The converter also creates the properties files from the XLS (import).
 
+## Arguments
+Short and long name | Description
+------------------- | -----------
+-f, --function | The function: 'import' or 'export'. (mandatory)
+-xls, --xlsFileName | The excel file used by the import or export function. (mandatory)
+-wd, --workingDirectory | The working directory used as a base directory for searching the properties files reqursively. (mandatory)
+-r, --fileRegularExpression | Regular expression used to search the properties files recursively. (mandatory for export function)
+-langs, --languages | Comma separated list of the languages to be processed. (mandatory for the export function)
+
 ## Usage
 
 ###Export
 ```
 $ java -jar org.everit.i18n.propsxlsconverter-{version}.jar -f export -xls propsxlsconverter.xls -wd /tmp/ -langs hu,de,us -r .*\.properties
 ```
-###Import
-```
-$ java -jar org.everit.i18n.propsxlsconverter-{version}.jar -f import -xls propsxlsconverter.xls -wd /tmp/
-```
-## Arguments
-Short and long name | Description
-------------------- | -----------
--f, --function | The function: 'import' or 'export'. (mandatory)
--xls, --xlsFileName | The excel file used by the import or export function. (mandatory)
--wd, --workingDirectory | The working directory used as a base directory for searching the 
-properties files reqursively. (mandatory)
--r, --fileRegularExpression | Regular expression used to search the properties files recursively. 
-(mandatory for export function)
--langs, --languages | Comma separated list of the languages to be processed. (mandatory for the 
-export function)
-
-## Működés
-
-### Export
-
 A konvertáló export funkciójának működése.
 * Ellenőrzésre kerülnek az argumentumok (összes szükséges argumentum meg van-e, munka könyvtár könytár-e, reguláris kifejezés valid-e)
 * Megkeresésre kerülnek a reguláris kifejezés alapján a nyelvi fájlok.
@@ -46,8 +35,10 @@ Az elkészítésre XLS fájl oszlop leírása.
 * C oszlop: az alapértelmezett nyelvhez tartozó érték
 * D - * oszlop: a megadott nyelvekhez tartozó érték
 
-### Import
-
+###Import
+```
+$ java -jar org.everit.i18n.propsxlsconverter-{version}.jar -f import -xls propsxlsconverter.xls -wd /tmp/
+```
 A konvertáló import funckiójának működése.
 
 * Ellenőrzésre kerülnek az argumentumok (összes szükséges argumentum meg van-e, reguláris kifejezés valid-e)
