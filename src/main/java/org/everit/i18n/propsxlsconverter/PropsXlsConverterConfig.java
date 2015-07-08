@@ -45,31 +45,27 @@ public class PropsXlsConverterConfig {
 
   static {
     OPTIONS.addOption("f", ARG_FUNCTION, true,
-        "The function: 'import' or 'export'."
-            + "\nimport: Processes the given excel file and creates the properties files from it."
+        "The function: 'import' or 'export'. (mandatory)"
             + "\nexport: exports the properties files to a human readable and editable excel file."
-            + "\nMandatory.");
+            + "\nimport: Processes the given excel file and creates the properties files from it.");
 
     OPTIONS.addOption("xls", ARG_XLS_FILE_NAME, true,
-        "The excel file used for the import or export function."
-            + "\nFor example: translation.xls"
-            + "\nMandatory.");
+        "The excel file used by the import or export function. (mandatory)"
+            + "\nFor example: translation.xls");
 
     OPTIONS.addOption("wd", ARG_WORKING_DIRECTORY, true,
         "The working directory used as a base directory for searching the properties files "
-            + "reqursively."
-            + "\nFor example: /home/foo or C:\\Users\\foo"
-            + "\nMandatory.");
+            + "reqursively. (mandatory)"
+            + "\nFor example: /home/foo or C:\\Users\\foo");
 
     OPTIONS.addOption("r", ARG_FILE_REGULAR_EXPRESSION, true,
-        "Regular expression used to search the properties files recursively."
-            + "\nFor example: .*\\.properties$"
-            + "\nMandatory for export function.");
+        "Regular expression used to search the properties files recursively. (mandatory for export "
+            + "function)"
+            + "\nFor example: .*\\.properties$");
 
     OPTIONS.addOption("langs", ARG_LANGUAGES, true,
-        "Comma separated list of the languages to be processed."
-            + "\nFor example: hu,de"
-            + "\nMandatory for the export function.");
+        "Comma separated list of the languages to be processed. (mandatory for the export function)"
+            + "\nFor example: hu,de");
   }
 
   private final CommandLine commandLine;
