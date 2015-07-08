@@ -20,30 +20,18 @@ Short and long name | Description
 
 ###Export
 ```
-$ java -jar org.everit.i18n.propsxlsconverter-{version}.jar -f export -xls propsxlsconverter.xls -wd /tmp/ -langs hu,de,us -r .*\.properties
+$ java -jar org.everit.i18n.propsxlsconverter-{version}.jar -f export -xls translations.xls -wd /tmp/ -langs hu,de,us -r .*\.properties
 ```
-A konvertáló export funkciójának működése.
-* Ellenőrzésre kerülnek az argumentumok (összes szükséges argumentum meg van-e, munka könyvtár könytár-e, reguláris kifejezés valid-e)
-* Megkeresésre kerülnek a reguláris kifejezés alapján a nyelvi fájlok.
-* Az XLS alap információk elhelyezésre kerülnek az XLS munkafüzetben.
-* A nyelvi fájlok feldolgozása és az XLS munkafüzet folyamatos bővítése.
-* Az XLS fájl fizikai létrehozása.
-
-Az elkészítésre XLS fájl oszlop leírása.
-* A oszlop: a nyelvi fájl elérése a munkakönyvtárhoz képest
-* B oszlop: a nyelvi fájlban lévő kulcs érték
-* C oszlop: az alapértelmezett nyelvhez tartozó érték
-* D - * oszlop: a megadott nyelvekhez tartozó érték
+The format of the created XLS file:
+* Column A: the properties file location according to the working directory
+* Column B: the keys used in the properties files
+* Column C: the values of the keys of the default language
+* Column D - *: the values of the additional languages
 
 ###Import
 ```
-$ java -jar org.everit.i18n.propsxlsconverter-{version}.jar -f import -xls propsxlsconverter.xls -wd /tmp/
+$ java -jar org.everit.i18n.propsxlsconverter-{version}.jar -f import -xls translations.xls -wd /tmp/
 ```
-A konvertáló import funckiójának működése.
 
-* Ellenőrzésre kerülnek az argumentumok (összes szükséges argumentum meg van-e, reguláris kifejezés valid-e)
-* Beolvasásra kerül az XLS fájl.
-* Az XLS fájl feldolgozásának megkezdése.
-* A feldolgozás közben, amint egy nyelvi fájl teljesen beolvasásra került elkészítésre kerül a fájl.
-
-Fontos, hogy a táblázat alapján az import során az alapértelmezett és a táblázatban szereplő nyelvekhez mindenképpen létrejönnek a nyelvi fájlok, függetlenül hogy az adott nyelven egyetlen egy szöveg sem tartozik!
+*Important:* Using the import function all language files will be created even if there were no 
+keys in a given language.
