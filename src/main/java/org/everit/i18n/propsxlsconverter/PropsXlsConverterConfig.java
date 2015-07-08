@@ -72,6 +72,9 @@ public class PropsXlsConverterConfig {
 
   /**
    * Constructor.
+   * 
+   * @param args
+   *          the command line arguments
    */
   public PropsXlsConverterConfig(final String[] args) {
 

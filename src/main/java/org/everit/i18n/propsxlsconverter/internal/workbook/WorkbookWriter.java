@@ -30,6 +30,11 @@ public class WorkbookWriter extends AbstractWorkbook {
 
   /**
    * Constructor.
+   *
+   * @param xlsFileName
+   *          the file name of the xls to write
+   * @param languages
+   *          the languages to be processed
    */
   public WorkbookWriter(final String xlsFileName, final String[] languages) {
 

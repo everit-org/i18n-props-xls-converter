@@ -32,6 +32,9 @@ public class WorkbookReader extends AbstractWorkbook {
 
   /**
    * Constructor.
+   *
+   * @param xlsFileName
+   *          the file name of the xls to read
    */
   public WorkbookReader(final String xlsFileName) {
     super(xlsFileName);
@@ -54,9 +57,6 @@ public class WorkbookReader extends AbstractWorkbook {
    * Get next row in the sheet. Read rows between second to last row.
    *
    * @return the {@link WorkbookRowDTO}.
-   *
-   * @throws LanguageException
-   *           when not opened workbook.
    */
   public WorkbookRowDTO getNextRow() {
     if (sheet == null) {
