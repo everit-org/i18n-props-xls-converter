@@ -73,7 +73,8 @@ public class WorkbookReader extends AbstractWorkbook {
 
     langColumnNumber.forEach((key, value) -> {
       HSSFCell langCell = row.getCell(value);
-      langValues.put(key, langCell.getStringCellValue());
+      String langValue = langCell == null ? "" : langCell.getStringCellValue();
+      langValues.put(key, langValue);
     });
 
     return new WorkbookRowDTO()
