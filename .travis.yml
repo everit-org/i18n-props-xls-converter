@@ -1,5 +1,9 @@
 language: java
 jdk:
   - oraclejdk8
-script: mvn integration-test
+script: mvn verify
 install: true
+sudo: false
+cache:
+  directories:
+    - $HOME/.m2
