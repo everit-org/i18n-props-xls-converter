@@ -15,6 +15,17 @@
  */
 package org.everit.i18n.propsxlsconverter.internal;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
+import org.everit.i18n.propsxlsconverter.I18nConverter;
+import org.everit.i18n.propsxlsconverter.internal.dto.PropKeyRowNumberDTO;
+import org.everit.i18n.propsxlsconverter.internal.dto.WorkbookRowDTO;
+import org.everit.i18n.propsxlsconverter.internal.workbook.WorkbookReader;
+import org.everit.i18n.propsxlsconverter.internal.workbook.WorkbookWriter;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -37,16 +48,6 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.commons.io.filefilter.RegexFileFilter;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.everit.i18n.propsxlsconverter.I18nConverter;
-import org.everit.i18n.propsxlsconverter.internal.dto.PropKeyRowNumberDTO;
-import org.everit.i18n.propsxlsconverter.internal.dto.WorkbookRowDTO;
-import org.everit.i18n.propsxlsconverter.internal.workbook.WorkbookReader;
-import org.everit.i18n.propsxlsconverter.internal.workbook.WorkbookWriter;
-
 /**
  * The {@link I18nConverter} implementation.
  */
@@ -55,6 +56,8 @@ public class I18nConverterImpl implements I18nConverter {
   private static final int SEPARATOR_SIZE = 5;
 
   private static final String UNDERLINE = "_";
+
+  private static final String EQUALSIGN = "=";
 
   /**
    * Map key is fileAccces.
@@ -154,7 +157,7 @@ public class I18nConverterImpl implements I18nConverter {
         while ((line = br.readLine()) != null) {
           // ignore empty and comment lines
           if (!"".equals(line) && (line.charAt(0) != '#')) {
-            String unescapedLine = StringEscapeUtils.unescapeJava(line);
+            String unescapedLine = trimLineAroundEqualSign(StringEscapeUtils.unescapeJava(line));
             int separatorIndex = getPropertySeparatorIndex(unescapedLine);
             String propKey = unescapedLine.substring(0, separatorIndex);
             String propValue = unescapedLine.substring(separatorIndex + 1);
@@ -231,6 +234,26 @@ public class I18nConverterImpl implements I18nConverter {
     }
     return "";
   }
+
+  /**
+   * Remove spaces around =.
+   * e.g. key.subkey      = value
+   * @param line string to trim. should have equal sign.
+   * @return trimmed string
+   */
+  private String trimLineAroundEqualSign(final String line) {
+
+    if (line.contains(EQUALSIGN)) {
+
+      String key = StringUtils.trim(StringUtils.substringBefore(line, EQUALSIGN));
+      String value = StringUtils.trimToEmpty(StringUtils.substringAfter(line, EQUALSIGN));
+
+      return key + EQUALSIGN + value;
+    } else {
+      return line;
+    }
+  }
+
 
   private int getPropertySeparatorIndex(final String unescapedLine) {
     int[] separators = new int[SEPARATOR_SIZE];
